@@ -11,12 +11,16 @@ dotenv.config();
 
 //getting the root directory path
 const __dirname = path.resolve()
-
 const app = express();
+
+const DB = 'mongodb+srv://ankit:ankit501@cluster0.0wt3ijf.mongodb.net/?retryWrites=true&w=majority'
 //Database connection
 const port = process.env.PORT || 3000
-mongoose.connect('mongodb://localhost:27017/jwt').then(() => {
+// 'mongodb://localhost:27017/jwt'
+mongoose.connect(DB).then(() => {
     console.log("Database connected successfully");
+}).catch((err) => {
+    console.log(err.message);
 })
 
 //middleWares
@@ -189,6 +193,11 @@ app.post('/login', async (req, res) => {
             email: "not found"
         })
     }
+})
+
+
+app.get("/", (req, res) => {
+    res.send("hello")
 })
 app.listen(port, () => {
     console.log("Server started at http://localhost:3000")
