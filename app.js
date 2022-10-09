@@ -9,6 +9,8 @@ import { Task } from "./db/taskSchema.js";
 import dotenv from 'dotenv'
 dotenv.config();
 
+
+
 //getting the root directory path
 const __dirname = path.resolve()
 const app = express();
