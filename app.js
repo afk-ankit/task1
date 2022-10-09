@@ -91,22 +91,25 @@ app.post("/update", async (req, res) => {
     console.log(task)
     const { _id } = jwt.verify(req.cookies.jwt, process.env.MY_SECRET)
     const updatedTask = req.body.updatedTask;
-    let taskCollection = await Task.findOne({ uid: _id });
-    let taskArray = taskCollection.tasks;
-    const index = taskCollection.tasks.findIndex((e) => {
-        return e.task == task;
-    })
-    taskArray[index] = {
-        ...taskArray[index],
-        task: updatedTask
+    if (updatedTask) {
+        let taskCollection = await Task.findOne({ uid: _id });
+        let taskArray = taskCollection.tasks;
+        const index = taskCollection.tasks.findIndex((e) => {
+            return e.task == task;
+        })
+        taskArray[index] = {
+            ...taskArray[index],
+            task: updatedTask
+        }
+        await Task.findOneAndUpdate({ uid: _id }, {
+            uid: _id,
+            tasks: taskArray
+        })
+        console.log(index);
+        console.log(taskCollection.tasks)
+        res.redirect('/')
     }
-    await Task.findOneAndUpdate({ uid: _id }, {
-        uid: _id,
-        tasks: taskArray
-    })
-    console.log(index);
-    console.log(taskCollection.tasks)
-    res.redirect('/')
+
 })
 app.get("/signin", (req, res) => {
     res.sendFile(__dirname + '/public/signin.html')
@@ -186,13 +189,6 @@ app.post('/login', async (req, res) => {
             email: "not found"
         })
     }
-})
-
-
-app.delete("/dummy", (req, res) => {
-    console.log("done")
-
-    res.status(200)
 })
 app.listen(port, () => {
     console.log("Server started at http://localhost:3000")
