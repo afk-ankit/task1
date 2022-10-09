@@ -16,11 +16,10 @@ dotenv.config();
 const __dirname = path.resolve()
 const app = express();
 
-const DB = 'mongodb+srv://ankit:ankit501@cluster0.0wt3ijf.mongodb.net/?retryWrites=true&w=majority'
 //Database connection
 const port = process.env.PORT || 3000
 // 'mongodb://localhost:27017/jwt'
-mongoose.connect(DB).then(() => {
+mongoose.connect(process.env.DB).then(() => {
     console.log("Database connected successfully");
 }).catch((err) => {
     console.log(err.message);
