@@ -7,8 +7,9 @@ import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { Task } from "./db/taskSchema.js";
 import dotenv from 'dotenv'
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUI from 'swagger-ui-express'
 dotenv.config();
-
 
 
 //getting the root directory path
@@ -47,13 +48,55 @@ const auth = async (req, res, next) => {
 }
 
 
+//Swagger options
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'Api',
+            version: '1.0.0'
+        }
+    },
+    apis: ['app.js']
+}
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions)
+
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs))
+
 //Routes Started 
+
+/**
+ * @swagger
+ * /:
+ *  get:
+ *   description: Get all the tasks
+ *   responses:
+ *    200:
+ *     description: success
+ */
+
+
 app.get("/", auth, async (req, res) => {
     const { _id } = jwt.verify(req.cookies.jwt, process.env.MY_SECRET)
     const result = await Task.findOne({ uid: _id })
     res.render('index', { result: result?.tasks })
 })
 
+/**
+ * @swagger
+ * /:
+ *  post:
+ *   description: Add task
+ *   parameters:
+ *   - name: task
+ *     description: Add task to the DB
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   responses:
+ *    201:
+ *     description: created
+ */
 
 app.post('/', auth, async (req, res) => {
     const { _id } = jwt.verify(req.cookies.jwt, process.env.MY_SECRET)
@@ -79,6 +122,21 @@ app.post('/', auth, async (req, res) => {
 
 
 //route to delete the items
+/**
+ * @swagger
+ * /delete:
+ *  post:
+ *   description: Delete the task
+ *   parameters:
+ *   - name: task
+ *     description: Delete task from the DB
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   responses:
+ *    200:
+ *     description: success 
+ */
 app.post('/delete', auth, async (req, res) => {
     const task = req.query.task;
     const { _id } = jwt.verify(req.cookies.jwt, process.env.MY_SECRET)
@@ -92,6 +150,27 @@ app.post('/delete', auth, async (req, res) => {
 
 
 //route to update the items
+
+/**
+ * @swagger
+ * /Update:
+ *  post:
+ *   description: Update Task
+ *   parameters:
+ *   - name: task
+ *     description: task to be replaced
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   - name: updatedTask
+ *     description: updated task
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   responses:
+ *    201:
+ *     description: created
+ */
 app.post("/update", async (req, res) => {
     const task = req.query.task;
     console.log(task)
@@ -117,11 +196,45 @@ app.post("/update", async (req, res) => {
     }
 
 })
+
+/**
+ * @swagger
+ * /singin:
+ *  get:
+ *   description: dispalays the signin page
+ *   responses:
+ *    200:
+ *     description: success
+ */
 app.get("/signin", (req, res) => {
     res.sendFile(__dirname + '/public/signin.html')
 })
 
-
+/**
+ * @swagger
+ * /signin:
+ *  post:
+ *   description: Signin route
+ *   parameters:
+ *   - name: email
+ *     description: email
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   - name: password
+ *     description: password
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   - name: cpassword
+ *     description: comfirm password
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   responses:
+ *    200:
+ *     description: success
+ */
 app.post("/signin", async (req, res) => {
     const { email, password, cpassword } = req.body;
     User.find({ email }, function (err, doc) {
@@ -165,13 +278,40 @@ app.post("/signin", async (req, res) => {
 
 })
 
-
+/**
+ * @swagger
+ * /login:
+ *  get:
+ *   description: displays the login page
+ *   responses:
+ *    200:
+ *     description: success
+ */
 app.get('/login', (req, res) => {
     res.sendFile(__dirname + '/public/login.html')
 })
 
 
-
+/**
+ * @swagger
+ * /login:
+ *  post:
+ *   description: login route
+ *   parameters:
+ *   - name: email
+ *     description: email
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   - name: password
+ *     description: password
+ *     in: formData
+ *     required: true
+ *     type: string
+ *   responses:
+ *    200:
+ *     description: success
+ */
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     const doc = await User.findOne({ email })
@@ -198,9 +338,7 @@ app.post('/login', async (req, res) => {
 })
 
 
-app.get("/", (req, res) => {
-    res.send("hello")
-})
+
 app.listen(port, () => {
     console.log("Server started at http://localhost:3000")
 })
